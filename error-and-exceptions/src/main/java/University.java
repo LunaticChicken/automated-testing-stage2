@@ -1,7 +1,9 @@
+import exceptions.*;
 import java.util.*;
 
 public class University extends ArrayList<Faculty> {
-    public University(Faculty ...faculties) {
+    public University(Faculty ...faculties) throws FacultyNotFoundException {
+        if (faculties.length == 0) throw new FacultyNotFoundException("University doesn't have any faculty");
         this.addAll(Arrays.asList(faculties));
     }
 

@@ -1,8 +1,7 @@
-import java.util.HashMap;
-import java.util.Map;
+import exceptions.*;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws MarkOutOfBoundsException, SubjectNotFoundException, StudentNotFoundException, GroupNotFoundException, FacultyNotFoundException {
         String[] subjects1 = {"ИКГ", "ИПЭ", "Физика", "ЭТТ"};
         String[] subjects2 = {"ВМиП", "ОАиП", "ИТАС", "ТОЭ"};
         String[] subjects3 = {"ВТвИ", "ОАиП", "Физика", "Математика"};
@@ -35,5 +34,7 @@ public class Main {
                 university.getAverageMarkOfASubjectInAGroup("ОАиП", group2));
         System.out.println("An average mark of 'Физика' subject in university = " +
                 university.getAverageMarkOfASubjectInUniversity("Физика"));
+
+        University university0 = new University();
     }
 }

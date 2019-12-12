@@ -1,6 +1,7 @@
 public class Port extends Thread {
     private int currentAmountOfContainers, maxAmountOfContainers;
     private Dock[] docks;
+
     public Port(String string, int currentAmountOfContainers, int maxAmountOfContainers, Dock[] docks) {
         super(string);
         this.currentAmountOfContainers = currentAmountOfContainers;
@@ -23,19 +24,12 @@ public class Port extends Thread {
         return maxAmountOfContainers;
     }
 
-    private boolean atLeastOneShipIsNotReady(Dock[] docks) {
-        for (Dock dock : docks) {
-            if (!dock.getCurrentShipInTheDock().isReady()) return true;
-        }
-        return false;
-    }
-
     @Override
     public void run() {
-        while (atLeastOneShipIsNotReady(docks)) {
-            for (Dock dock : docks) dock.check(currentAmountOfContainers, maxAmountOfContainers);
+        while (true) {
+            for (Dock dock : docks) dock.checkIfPortIsFullOrEmpty(currentAmountOfContainers, maxAmountOfContainers);
             try {
-                Thread.sleep(500); //5000
+                Thread.sleep(50);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

@@ -2,13 +2,15 @@ public class Dock {
     private Port port;
     private Ship currentShipInTheDock;
 
-    public Dock() throws InterruptedException {
-        currentShipInTheDock = Main.ships.take();
+    public Dock() {
+        if (Main.ships.peek() == null) return;
+        currentShipInTheDock = Main.ships.poll();
         currentShipInTheDock.setCurrentDock(this);
     }
 
-    public void nextShip() throws InterruptedException {
-        currentShipInTheDock = Main.ships.take();
+    public void nextShip() {
+        if (Main.ships.peek() == null) return;
+        currentShipInTheDock = Main.ships.poll();
         currentShipInTheDock.setCurrentDock(this);
         currentShipInTheDock.start();
     }
@@ -21,16 +23,17 @@ public class Dock {
         this.port = port;
     }
 
-    public synchronized void check(int currentAmountOfContainers, int maxAmountOfContainers) {
+    public synchronized void checkIfPortIsFullOrEmpty(int currentAmountOfContainers, int maxAmountOfContainers) {
         if (currentAmountOfContainers > maxAmountOfContainers-100) {
-            port.setCurrentAmountOfContainers(currentAmountOfContainers-500);
-            System.out.print("500 containers were exported");
+            port.setCurrentAmountOfContainers(currentAmountOfContainers-1000);
+            System.out.print("1000 containers were exported. ");
+            System.out.println("Port has " + port.getCurrentAmountOfContainers()+"/"+maxAmountOfContainers + " containers");
         }
         if (currentAmountOfContainers < 100) {
-            port.setCurrentAmountOfContainers(currentAmountOfContainers+500);
-            System.out.println("500 containers were imported");
+            port.setCurrentAmountOfContainers(currentAmountOfContainers+1000);
+            System.out.println("1000 containers were imported. ");
+            System.out.println("Port has " + port.getCurrentAmountOfContainers()+"/"+maxAmountOfContainers + " containers");
         }
-        System.out.println("Port has " + port.getCurrentAmountOfContainers()+"/"+maxAmountOfContainers + " containers");
         notifyAll();
     }
 
@@ -39,13 +42,14 @@ public class Dock {
             System.out.println("WARNING! Port is empty. Waiting for importing... ");
             wait();
         }
-        currentShipInTheDock.setCurrentAmountOfContainers(currentShipInTheDock.getCurrentAmountOfContainers()+100);
-        port.setCurrentAmountOfContainers(port.getCurrentAmountOfContainers()-100);
-        System.out.print(currentShipInTheDock.getName() + " has " +currentShipInTheDock.getCurrentAmountOfContainers()
-                + "/" + currentShipInTheDock.getMaxAmountOfContainers() + " containers. ");
-        System.out.println("Port has " +
-                port.getCurrentAmountOfContainers()+"/"+port.getMaxAmountOfContainers() + " containers");
-        Thread.sleep(2);//1000
+        synchronized (port) {
+            currentShipInTheDock.setCurrentAmountOfContainers(currentShipInTheDock.getCurrentAmountOfContainers()+100);
+            port.setCurrentAmountOfContainers(port.getCurrentAmountOfContainers()-100);
+            System.out.printf("%s has %s/%s containers. Port has %s/%s containers\n", currentShipInTheDock.getName(),
+                    currentShipInTheDock.getCurrentAmountOfContainers(), currentShipInTheDock.getMaxAmountOfContainers(),
+                    port.getCurrentAmountOfContainers(), port.getMaxAmountOfContainers());
+        }
+        Thread.sleep(10);
     }
 
     public synchronized void unloadContainersFromShip() throws InterruptedException {
@@ -53,12 +57,13 @@ public class Dock {
             System.out.println("WARNING! Port is full. Waiting for exporting... ");
             wait();
         }
-        currentShipInTheDock.setCurrentAmountOfContainers(currentShipInTheDock.getCurrentAmountOfContainers()-100);
-        port.setCurrentAmountOfContainers(port.getCurrentAmountOfContainers()+100);
-        System.out.print(currentShipInTheDock.getName() + " has " +currentShipInTheDock.getCurrentAmountOfContainers()
-                + "/" + currentShipInTheDock.getMaxAmountOfContainers() + " containers. ");
-        System.out.println("Port has " +
-                port.getCurrentAmountOfContainers()+"/"+port.getMaxAmountOfContainers() + " containers");
-        Thread.sleep(5); //1000
+        synchronized (port) {
+            currentShipInTheDock.setCurrentAmountOfContainers(currentShipInTheDock.getCurrentAmountOfContainers()-100);
+            port.setCurrentAmountOfContainers(port.getCurrentAmountOfContainers()+100);
+            System.out.printf("%s has %s/%s containers. Port has %s/%s containers\n", currentShipInTheDock.getName(),
+                    currentShipInTheDock.getCurrentAmountOfContainers(), currentShipInTheDock.getMaxAmountOfContainers(),
+                    port.getCurrentAmountOfContainers(), port.getMaxAmountOfContainers());
+        }
+        Thread.sleep(10);
     }
 }

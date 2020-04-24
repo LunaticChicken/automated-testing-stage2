@@ -8,59 +8,57 @@ public class Main {
     }
 
     private static void tree(String pathname) throws IOException {
-        if (pathname.substring(pathname.length()-4).equals(".txt")) {
+        if (pathname.matches(".*\\.txt$")) {
             analyzeTree(pathname);
         } else {
-            FileWriter writer = new FileWriter("src\\main\\java\\task1.txt");
+            FileWriter writer = new FileWriter("src\\main\\java\\MainTask.txt");
+            File externalDirectory = new File(pathname);
+            writer.write(externalDirectory.getAbsolutePath() + "\n");
             drawTree(new File(pathname), 1, writer);
             writer.flush();
             writer.close();
         }
     }
 
-    private static void drawTree(File externalFile, int recursionDepth, FileWriter writer) throws IOException {
-        List<File> directoryList = new ArrayList<>(), fileList = new ArrayList<>();
-        for (File file : externalFile.listFiles()) {
+    private static void drawTree(File externalDirectory, int recursionDepth, FileWriter writer) throws IOException {
+        List<File> directoryList = new ArrayList<>();
+        List<File> fileList = new ArrayList<>();
+        for (File file : externalDirectory.listFiles()) {
             if (file.isFile()) fileList.add(file);
             else directoryList.add(file);
         }
         for (File file : fileList) {
-            writer.write(String.format("%"+recursionDepth+"s", "").replace(" ", "│   ")
+            writer.write(String.format("%" + recursionDepth + "s", "").replace(" ", "│   ")
                     + file.getName() + "\n");
         }
         for (File file : directoryList) {
-            boolean isCurrentFolderLast = directoryList.get(directoryList.size()-1) == file;
-            try {
-                writer.write(String.format("%"+(recursionDepth-1)+"s", "").replace(" ", "│   "));
-            } catch (FormatFlagsConversionMismatchException ignored) { }
+            boolean isCurrentFolderLast = directoryList.get(directoryList.size() - 1) == file;
+            if (recursionDepth > 1) {
+                writer.write(String.format("%" + (recursionDepth-1) + "s", "").replace(" ", "│   "));
+            }
             writer.write((isCurrentFolderLast ? "└───" : "├───") + file.getName() + "\n");
-            drawTree(file, recursionDepth+1, writer);
+            drawTree(file, recursionDepth + 1, writer);
         }
     }
 
     private static void analyzeTree(String pathname) throws IOException {
-        int amountOfFolders = 0, amountOfFiles = 0, amountOfFilesInCurrentFolder = 0;
-        List<String> listOfStrings = Files.readAllLines(Paths.get(pathname));
-        List<Integer> amountOfFilesInEachFolder = new ArrayList<>();
-        List<Integer> lengthsOfFileNames = new ArrayList<>();
-        for (String string : listOfStrings) {
+        int amountOfFolders = 0, amountOfFiles = 0, totalLengthOfFilesNames = 0;
+        List<String> stringsOfMainTXTFile = Files.readAllLines(Paths.get(pathname));
+        stringsOfMainTXTFile.set(0, "");
+        for (String string : stringsOfMainTXTFile) {
             if (string.contains("└───") || string.contains("├───")) {
                 amountOfFolders++;
-                amountOfFilesInEachFolder.add(amountOfFilesInCurrentFolder);
-                amountOfFilesInCurrentFolder = 0;
-            } else {
-                lengthsOfFileNames.add(string.substring(string.lastIndexOf("│   ")+4).length());
+            } else if (!string.equals("")) {
                 amountOfFiles++;
-                amountOfFilesInCurrentFolder++;
+                totalLengthOfFilesNames += string.substring(string.lastIndexOf("│   ") + 4).length();
             }
         }
-        double averageAmountOfFilesInFolder =
-                (double) amountOfFilesInEachFolder.stream().mapToInt(s->s).sum() / amountOfFilesInEachFolder.size();
-        double averageLengthOfFileName =
-                (double) lengthsOfFileNames.stream().mapToInt(s->s).sum() / lengthsOfFileNames.size();
+        double averageAmountOfFilesInFolder = (double) amountOfFiles / amountOfFolders;
+        double averageLengthOfFileName = (double) totalLengthOfFilesNames / amountOfFiles;
+
         System.out.println("Amount of folders = " + amountOfFolders);
         System.out.println("Amount of files = " + amountOfFiles);
-        System.out.println("Average amount of files in folder = " + averageAmountOfFilesInFolder);
+        System.out.println("Average amount of files in a folder = " + averageAmountOfFilesInFolder);
         System.out.println("Average length of file name = " + averageLengthOfFileName);
     }
 }

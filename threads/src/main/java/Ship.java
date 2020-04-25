@@ -1,48 +1,36 @@
-public class Ship extends Thread {
+public class Ship {
+    private String name;
     private int currentAmountOfContainers, maxAmountOfContainers;
     private boolean needsLoading;
-    private Dock currentDock;
 
-    public Ship(String string, int currentAmountOfContainers, int maxAmountOfContainers) {
-        super(string);
+    public Ship(String name, int currentAmountOfContainers, int maxAmountOfContainers) {
+        this.name = name;
         this.currentAmountOfContainers = currentAmountOfContainers;
         this.maxAmountOfContainers = maxAmountOfContainers;
         needsLoading = currentAmountOfContainers < maxAmountOfContainers/2;
     }
 
-    public void setCurrentDock(Dock currentDock) {
-        this.currentDock = currentDock;
+    public void load(int amountOfContainers) {
+        currentAmountOfContainers += amountOfContainers;
+    }
+
+    public void unload(int amountOfContainers) {
+        currentAmountOfContainers -= amountOfContainers;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public int getCurrentAmountOfContainers() {
         return currentAmountOfContainers;
     }
 
-    public void setCurrentAmountOfContainers(int currentAmountOfContainers) {
-        this.currentAmountOfContainers = currentAmountOfContainers;
-    }
-
     public int getMaxAmountOfContainers() {
         return maxAmountOfContainers;
     }
 
-    @Override
-    public void run() {
-        try {
-            if (needsLoading) {
-                System.out.printf("NEW SHIP IN THE DOCK. %s(%s/%s) has started loading\n",
-                        this.getName(), currentAmountOfContainers, maxAmountOfContainers);
-                while (currentAmountOfContainers <= maxAmountOfContainers-100) currentDock.loadContainersOnShip();
-                System.out.println("SUCCESS! " + this.getName() + " was loaded");
-            } else {
-                System.out.printf("NEW SHIP IN THE DOCK. %s(%s/%s) has started unloading\n",
-                        this.getName(), currentAmountOfContainers, maxAmountOfContainers);
-                while (currentAmountOfContainers >= 100) currentDock.unloadContainersFromShip();
-                System.out.println("SUCCESS! " + this.getName() + " was unloaded");
-            }
-            currentDock.nextShip();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    public boolean isNeedsLoading() {
+        return needsLoading;
     }
 }

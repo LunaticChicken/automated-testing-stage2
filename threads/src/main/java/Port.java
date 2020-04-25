@@ -1,13 +1,10 @@
-public class Port extends Thread {
+public class Port {
     private int currentAmountOfContainers, maxAmountOfContainers;
-    private Dock[] docks;
 
-    public Port(String string, int currentAmountOfContainers, int maxAmountOfContainers, Dock[] docks) {
-        super(string);
+    public Port(String name, int currentAmountOfContainers, int maxAmountOfContainers, DockThread[] docks) {
         this.currentAmountOfContainers = currentAmountOfContainers;
         this.maxAmountOfContainers = maxAmountOfContainers;
-        this.docks = docks;
-        for (Dock dock : docks) {
+        for (DockThread dock : docks) {
             dock.setPort(this);
         }
     }
@@ -16,23 +13,31 @@ public class Port extends Thread {
         return currentAmountOfContainers;
     }
 
-    public void setCurrentAmountOfContainers(int currentAmountOfContainers) {
-        this.currentAmountOfContainers = currentAmountOfContainers;
-    }
-
-    public int getMaxAmountOfContainers() {
-        return maxAmountOfContainers;
-    }
-
-    @Override
-    public void run() {
-        while (true) {
-            for (Dock dock : docks) dock.checkIfPortIsFullOrEmpty(currentAmountOfContainers, maxAmountOfContainers);
+    public synchronized void load(int amountOfContainers) {
+        while (currentAmountOfContainers >= maxAmountOfContainers) {
             try {
-                Thread.sleep(50);
+                wait();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+        currentAmountOfContainers += amountOfContainers;
+        notifyAll();
+    }
+
+    public synchronized void unload(int amountOfContainers) {
+        while (currentAmountOfContainers <= 0) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        currentAmountOfContainers -= amountOfContainers;
+        notifyAll();
+    }
+
+    public int getMaxAmountOfContainers() {
+        return maxAmountOfContainers;
     }
 }

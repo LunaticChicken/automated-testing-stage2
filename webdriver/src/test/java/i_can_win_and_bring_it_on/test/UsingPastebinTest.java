@@ -7,6 +7,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.testng.Assert;
+import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 
@@ -72,9 +73,9 @@ public class UsingPastebinTest {
         Assert.assertTrue(isPasteCodeMatchesEnteredCode);
     }
 
-//    @AfterSuite(alwaysRun = true)
-//    public void browserTearDown() {
-//        driver.quit();
-//        driver = null;
-//    }
+    @AfterSuite(alwaysRun = true)
+    public void browserTearDown() throws InterruptedException {
+        Thread.sleep(5000);
+        driver.quit();
+    }
 }
